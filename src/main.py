@@ -22,6 +22,7 @@ def get_local_ip(): #obtiene IP local (si falla, devuelve 127.0.0.1)
         return "127.0.0.1" #fallback
 
 
+
 def log_action(comando, mensaje, nivel="INFO"): #log detallado: IP, usuario, nivel, timestamp
     try:
         ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") #timestamp (datetime)(tiempo actual)(strftime es para formatear en cierto formato)
