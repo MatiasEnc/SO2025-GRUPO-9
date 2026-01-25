@@ -14,8 +14,9 @@ Código fuente de la shell personalizada desarrollada para el proyecto.
 - `diario.md`
 Registro cronológico de las sesiones de trabajo, decisiones tomadas y avances durante la construcción del sistema LFS.
 ---
-**Universidad Católica**
-**Carrera: Ingeniería Informática**
-**Materia: Sistemas Operativos 1**
-**Año: 2026**
-**Tipo: Trabajo Práctico Final**
+**Universidad Católica**  
+**Carrera: Ingeniería Informática**  
+**Materia: Sistemas Operativos 1**  
+**Año: 2026**  
+**Tipo: Trabajo Práctico Final**  
+
