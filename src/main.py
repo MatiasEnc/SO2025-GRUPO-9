@@ -54,7 +54,7 @@ def login(): #login simple (solo los usuarios de la lista)
 
 #---------------------------------------------------------------------------------------------
 
-def log_error(mensaje):  # guarda errores en sistema_error.log
+def log_error(mensaje): #guarda errores en sistema_error.log
     try:
         with open("sistema_error.log", "a") as f: #abre el archivo y escribe al final
             f.write(mensaje + "\n") #añade lo que este en mensaje al final de la linea y despues el salto de liena
@@ -86,17 +86,28 @@ def execute_command(cmd): #verfico el comando que quiere ejecutar(parametro el p
 
     elif cmd[0] == "ls": #Caso LS ()                                   caso 3
         if len(cmd) == 1:
-            print(os.listdir())
+            for elem in os.listdir(): #recorre el directorio actual
+                if os.path.isdir(elem): #verifica si es un directorio
+                    print(f"|-| {elem}") #muestra directorio con formato especial
+                else:
+                    print(f"- {elem}") #muestra archivo con formato especial
             log_action(cmd[0], f"Lectura de la carpeta realizado", "INFO")
+
         elif len(cmd) == 2:
             try: 
-                print(os.listdir(cmd[1]))
+                for elem in os.listdir(cmd[1]): #recorre el path indicado
+                    ruta = os.path.join(cmd[1], elem) #arma la ruta completa
+                    if os.path.isdir(ruta): #verifica si es directorio
+                        print(f"|_| {elem}") #muestra directorio con formato especial
+                    else:
+                        print(f"- {elem}") #muestra archivo con formato especial
                 log_action(cmd[0], f"Lectura de carpetas {cmd[1]}", "INFO")
-            except FileNotFoundError:
+
+            except FileNotFoundError: #caso de error especifico y despues lo agrega a log
                 print("No se encontro el path", cmd[1])
                 log_action(cmd[0], f"Error al econtrar el archivo {cmd[1]}", "ERROR")
         else:
-            print("Error al usar el comando LS")
+            print("Error al usar el comando LS") #caso de que use mal LS
             log_action(cmd[0], f"Comando mal utilizado", "ERROR")
 
 #/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +120,7 @@ def execute_command(cmd): #verfico el comando que quiere ejecutar(parametro el p
                 archivo = cmd[pos + 1] #nombre del archivo
                 try:
                     with open(archivo, "w") as f: #abre el archivo en modo escritura
-                        f.write(texto + "\n") #ecribe 
+                        f.write(texto + "\n") #escribe 
                         log_action(cmd[0], f"Creo un archivo de nombre", "INFO")
                 except PermissionError: #caso de eeror especifico
                     print("echo: permiso denegado:", archivo)
@@ -147,9 +158,9 @@ def execute_command(cmd): #verfico el comando que quiere ejecutar(parametro el p
                         confirmacion = input(f"El archivo {cmd[2]} ya existe. ¿Deseas sobrescribirlo? (s/n): ") #si deseas reescribir
                         if confirmacion.lower() != "s": #en el caso de que sea no
                             print("Operacion cancelada") #mesaje de cancelacion
-                            log_action("cp", f"Cancelado sobrescribir {cmd[2]}", "INFO")  # ---- log de cancelacion
+                            log_action("cp", f"Cancelado sobrescribir {cmd[2]}", "INFO") #log de cancelacion
                             return #devuelve sin salir
-                        log_action("cp", f"Sobrescritura confirmada {cmd[2]}", "CRITICAL")  # ---- log destructivo
+                        log_action("cp", f"Sobrescritura confirmada {cmd[2]}", "CRITICAL") #log destructivo
 
                     # Copia manual usando llamadas del SO (open/read/write)
                     fd_origen = os.open(cmd[1], os.O_RDONLY)
@@ -164,16 +175,16 @@ def execute_command(cmd): #verfico el comando que quiere ejecutar(parametro el p
                     os.close(fd_origen)
                     os.close(fd_destino)
 
-                    log_action("cp", f"Copio {cmd[1]} -> {cmd[2]}", "INFO") # ---- log de copia ok
+                    log_action("cp", f"Copio {cmd[1]} -> {cmd[2]}", "INFO") #log de copia ok
 
             except FileNotFoundError: #caso error
                 print("cp: archivo no encontrado")
-                log_error(f"cp: archivo inexistente -> {cmd[1]}") # ---- registra en sistema_error.log
-                log_action("cp", "Archivo no encontrado", "ERROR") # ---- log detallado
+                log_error(f"cp: archivo inexistente -> {cmd[1]}") #registra en sistema_error.log
+                log_action("cp", "Archivo no encontrado", "ERROR") #log detallado
             except PermissionError: #caso error
                 print("cp: permiso denegado")
-                log_error(f"cp: permiso denegado -> {cmd[1]} o {cmd[2]}") # ---- registra en sistema_error.log
-                log_action("cp", "Permiso denegado", "ERROR") # ---- log detallado
+                log_error(f"cp: permiso denegado -> {cmd[1]} o {cmd[2]}") #registra en sistema_error.log
+                log_action("cp", "Permiso denegado", "ERROR") #log detallado
         else:
             print("Comando cp mal utilizado debe ser: cp <origen> <destino>")
 
@@ -194,15 +205,15 @@ def execute_command(cmd): #verfico el comando que quiere ejecutar(parametro el p
                 print("cat: permiso denegado:", cmd[1]) #caso de error especifico
                 log_action(cmd[0], f"Error de permisos {cmd[1]}", "ERROR")
         else:
-            print("Comando cat mal utilizado debe ser: cat <archivo>")
-            log_action(cmd[0], f"Error al leer el archivo {cmd[1]}", "ERROR")
+            print("Comando cat mal utilizado debe ser: cat <archivo>") #mensaje de error
+            log_action(cmd[0], "Uso incorrecto: falta (cat <archivo>)", "ERROR") #agrego a log
 
 #/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     elif cmd[0] == "exit": #caso exit (tiene que salir de la shell).        caso 7
         if len(cmd) == 1: #verifico el tamaño del vector
             print("Hasta Luego :)") #Mensaje de Despedida
-            log_action("exit", "Salida del shell", "INFO")  # ---- log de salida
+            log_action("exit", "Salida del shell", "INFO") #log de salida
             sys.exit(0) #sale de la shell (parametro de que termino)
         else:
             print("El comando de Exit tiene mas de un argumento: comando invalido") #Manejo de errores
@@ -219,26 +230,41 @@ def execute_command(cmd): #verfico el comando que quiere ejecutar(parametro el p
                     confirmacion = input(f"¿Seguro que deseas borrar {cmd[1]}? (s/n): ") #pide confirmacion
                     if confirmacion.lower() == "s": #verifica si el usuario confirma (s)
                         os.remove(cmd[1]) #elimina el archivo manualmente
-                        log_action("rm", f"Borro {cmd[1]}", "CRITICAL")  # ---- log destructivo
+                        log_action("rm", f"Borro {cmd[1]}", "CRITICAL")  #log en caso de que destruya
                     else:
                         print("Operacion cancelada") #caso ponga n
-                        log_action("rm", f"Cancelado borrar {cmd[1]}", "INFO")  # ---- log de cancelacion
+                        log_action("rm", f"Cancelado borrar {cmd[1]}", "INFO") #log de cancelacion
             except FileNotFoundError: #caso si el archivo no existe
                 print("rm: archivo no encontrado:", cmd[1]) #muestra error si no encuentra
                 log_error(f"rm: archivo inexistente -> {cmd[1]}") #registra el error en sistema-error.log
-                log_action("rm", f"Archivo inexistente {cmd[1]}", "ERROR")  # ---- log detallado
+                log_action("rm", f"Archivo inexistente {cmd[1]}", "ERROR") #log detallado
             except PermissionError: #caso de que no tenga permisos
                 print("rm: permiso denegado:", cmd[1]) #muestra error de permisos
-                log_error(f"rm: permiso denegado -> {cmd[1]}")  # ---- registra en sistema_error.log
-                log_action("rm", f"Permiso denegado {cmd[1]}", "ERROR")  # ----log detallado
+                log_error(f"rm: permiso denegado -> {cmd[1]}") #registra en sistema_error.log
+                log_action("rm", f"Permiso denegado {cmd[1]}", "ERROR") #log detallado
         else:
             print("Comando rm mal utilizado deberia ser: rm <archivo>") #muestra uso correcto
 
 #/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    else:
-        print("Comando no encontrado") #Menja de error si no existe el comando
-        log_action(cmd[0], "Comando no encontrado", "WARN") #log de comando invalido
+    else: #Para que pueda ejecutar comandos externos
+        try:
+            pid = os.fork() #crea un proceso 
+            if pid == 0: #ejecuta el comando externo
+                os.execvp(cmd[0], cmd)
+                os._exit(1) #salida forzada en caso de que falle el execvp
+            else:
+                os.waitpid(pid, 0) #sincroniza
+                log_action(cmd[0], "Comando externo ejecutado (o finalizado)", "INFO") #log externo
+        except FileNotFoundError:
+            print("Comando no encontrado")
+            log_action(cmd[0], "Comando externo no encontrado", "WARN") #log externo invalido
+        except PermissionError:
+            print("Permiso denegado")
+            log_action(cmd[0], "Permiso denegado al ejecutar comando externo", "ERROR") #log de permisos externo
+        except OSError as e:
+            print("Error al ejecutar comando")
+            log_action(cmd[0], f"Error OS al ejecutar externo: {e}", "ERROR") #log de error
 
 #/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -247,20 +273,30 @@ def limpiar_input(input): #se le pasa el input
     return input #devuelve el input limpio
 
 def main():
-    if not login():  # ---- obliga login antes de entrar al shell
-        sys.exit(1)  # ---- si falla login, sale
+    if not login(): #obliga login antes de entrar al shell
+        sys.exit(1) #si falla login sale
 
     while True: #para que se ejecute siempre
-        current_path = os.getcwd().split("/")[-1] # carpeta donde estoy
-        u_input = input(f"[SHELL SO]{current_path} % ")
+        current_path = os.getcwd().split("/")[-1] #carpeta donde estoy
+        try: #detecta el ctrl c y ctrl d para que no se cierre la shell
+            u_input = input(f"[SHELL SO]{current_path} % ")
+        except KeyboardInterrupt: #caso ctrl c
+            print("\nintento de salida detectada si quiere salir use el comando exit") 
+            log_action("Ctrl+C", "Intento de salir", "WARN") #Para el log
+            continue
+        except EOFError: #Caso ctrl d
+            print("\nintento de salida detectada si quiere salir use el comando exit") #mensaje para el usuario
+            log_action("Ctrl+D", "Intento de salir", "WARN") #va al log
+            continue
+
         command = limpiar_input(u_input) #retorna lista
         if not command:
-            print("Porfavor ingresa algo") #mensaje de error
+            print("Porfavor ingresa algun comando") #mensaje de error
         else:
-            if horario_restringido() and command[0] != "exit":  # ---- bloquea por horario restringido
-                print("Horario restringido: no se permite ejecutar comandos entre 00:00 y 06:00")  # ---- mensaje de bloqueo
-                log_action(command[0], "Bloqueado por horario restringido", "WARN")  # ---- log de bloqueo
+            if horario_restringido() and command[0] != "exit": #No entra si esta en horario restringido
+                print("Horario restringido: no se permite ejecutar comandos entre las 00:00 y 06:00") #mensaje de bloqueo
+                log_action(command[0], "Bloqueado por horario No perimitido", "WARN") #log de bloqueo
             else:
-                execute_command(command)
+                execute_command(command) #funcion principal
 
 main()
