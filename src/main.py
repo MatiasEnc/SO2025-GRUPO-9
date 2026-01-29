@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from cd import cd #importamos a cd.py
 import os #importo la libreria que da acceso al sistema operativo
 import sys
