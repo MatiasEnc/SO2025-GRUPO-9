@@ -20,3 +20,8 @@ Registro cronológico de las sesiones de trabajo, decisiones tomadas y avances d
 **Año: 2026**  
 **Tipo: Trabajo Práctico Final**  
 
+paso intalacion
+crear carpeta shell para los logs
+sudo mkdir /var/log/shell
+
+sudo chmod 777 /var/log/shell
